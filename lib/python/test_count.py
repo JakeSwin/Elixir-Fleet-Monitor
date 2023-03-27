@@ -2,7 +2,7 @@ import sys
 import time
 
 from signal import signal, SIGPIPE, SIG_DFL
-signal(SIGPIPE,SIG_DFL)
+signal(SIGPIPE, SIG_DFL)
 
 count = 0
 

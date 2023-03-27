@@ -4,7 +4,7 @@ defmodule FleetMonitor.Runtime.Server do
 
   @type t :: pid
 
-  @command "python3.8 ./lib/python/test_string.py"
+  @command "python3.8 ./lib/python/test_count.py"
 
   ### Client Process
 
@@ -14,24 +14,19 @@ defmodule FleetMonitor.Runtime.Server do
 
   ### Server Process
   def init(_) do
-    port = Port.open({:spawn, @command}, [:binary, :exit_status])
+    _port = Port.open({:spawn, @command}, [:binary, :exit_status])
 
     { :ok, %{ latest_output: nil, exit_status: nil }}
   end
 
-  def handle_info({ port, { :data, data }}, state) do
-    cleaned_data =
-      data
-      |> String.trim()
-
-    Logger.info "Latest output: #{cleaned_data}"
-    { :noreply, %{ state | latest_output: cleaned_data }}
+  def handle_info({ _port, { :data, data }}, state) do
+    Logger.info "Latest output: #{data}"
+    { :noreply, %{ state | latest_output: data }}
   end
 
-  def handle_info({ port, { :exit_status, status}}, state) do
+  def handle_info({ _port, { :exit_status, status}}, state) do
     Logger.info "External exit: :exit_status: #{status}"
 
-    new_state = %{ state | exit_status: status }
     { :noreply, %{ state | exit_status: status }}
   end
 

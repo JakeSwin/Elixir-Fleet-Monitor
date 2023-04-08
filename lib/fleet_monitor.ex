@@ -1,18 +1,5 @@
 defmodule FleetMonitor do
-  @moduledoc """
-  Documentation for `FleetMonitor`.
-  """
+  alias FleetMonitor.Runtime.Server
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> FleetMonitor.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
+  defdelegate get_image, to: Server
 end

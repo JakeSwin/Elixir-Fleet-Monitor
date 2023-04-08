@@ -10,4 +10,4 @@ while True:
     sys.stdout.write(f"Count: {count}")
     sys.stdout.flush()
     count += 1
-    time.sleep(1)
+    time.sleep(.1)

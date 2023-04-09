@@ -4,7 +4,7 @@ defmodule FleetMonitor.Runtime.Server do
 
   @type t :: pid
 
-  @command "python3.8 ./lib/python/fleet_monitor.py"
+  @command "python3 ./lib/python/fleet_monitor.py"
   @me __MODULE__
 
   ### Client Process
@@ -17,21 +17,35 @@ defmodule FleetMonitor.Runtime.Server do
     GenServer.call(@me, { :get_image })
   end
 
+  def subscribe(pid) do
+    GenServer.call(@me, { :subscribe, pid })
+  end
+
   ### Server Process
   def init(_) do
     _port = Port.open({:spawn, @command}, [:binary, :exit_status])
 
-    { :ok, %{ latest_image: nil, exit_status: nil }}
+    { :ok, %{ latest_image: nil, exit_status: nil, image_partial: nil, pids: [] }}
   end
 
-  def handle_info({ _port, { :data, "data " <> image_data }}, state) do
+  def handle_info({ _port, { :data, "data: " <> image_data }}, state) do
     # Logger.info "Latest output: #{image_data}"
-    { :noreply, %{ state | latest_image: image_data }}
+    # Logger.info "Image Received"
+    Enum.each(state.pids, fn pid ->
+      GenServer.cast(pid, { :new_image, state.image_partial })
+    end)
+    { :noreply, %{ state | latest_image: state.image_partial, image_partial: image_data }}
+  end
+
+  def handle_info({ _port, { :data, "info: " <> info_data }}, state) do
+    Logger.info "Info: #{info_data}"
+    { :noreply, state }
   end
 
   def handle_info({ _port, { :data, data }}, state) do
-    Logger.info "Info: #{data}"
-    { :noreply, state }
+    # Logger.info "Info: #{data}"
+    # Logger.info "Image Part Received"
+    { :noreply, %{ state | image_partial: state.image_partial <> data } }
   end
 
   def handle_info({ _port, { :exit_status, status}}, state) do
@@ -48,5 +62,9 @@ defmodule FleetMonitor.Runtime.Server do
       data -> data
     end
     { :reply, image_base64, state}
+  end
+
+  def handle_call({ :subscribe, pid }, _from, state) do
+    { :reply, :ok, %{ state | pids: [ pid | state.pids ] }}
   end
 end

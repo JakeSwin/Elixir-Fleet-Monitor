@@ -17,6 +17,10 @@ FleetMonitor.get_image()
 ```
 
 ```elixir
+:observer.start()
+```
+
+```elixir
 ImageLoop.loop(10)
 ```
 

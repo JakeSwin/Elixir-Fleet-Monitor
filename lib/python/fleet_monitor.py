@@ -20,10 +20,13 @@ class MinimalSubscriber(Node):
         # '/robot1/camera/rgb/image_raw'
         self.subscription = self.create_subscription(
             Image,
-            '/camera/rgb/image_color',
+            '/camera/image_raw',
             self.listener_callback,
             1
         )
+        timer_period = 0.5
+        self.timer = self.create_timer(timer_period, self.timer_callback)
+        self.current_image = "info: None"
         self.subscription
 
     def listener_callback(self, msg):
@@ -32,7 +35,7 @@ class MinimalSubscriber(Node):
             cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
         except CvBridgeError as e:
             sys.stderr.write(f"{e}")
-        jpg_img = cv2.imencode(".jpg", cv_image, [int(cv2.IMWRITE_JPEG_QUALITY), 40])
+        jpg_img = cv2.imencode(".jpg", cv_image, [int(cv2.IMWRITE_JPEG_QUALITY), 20])
         b64_string = base64.b64encode(jpg_img[1]).decode("utf-8")
         end = time.time()
         # sys.stdout.write(f"height {msg.height} width {msg.width} time {end - start} data {b64_string}")
@@ -40,8 +43,9 @@ class MinimalSubscriber(Node):
         # sys.stdout.flush()
         # sys.stdout.write(f"time {end - start}")
         # sys.stdout.flush()
-        sys.stdout.write(f"data {b64_string}")
-        sys.stdout.flush()
+        # sys.stdout.write(f"data {b64_string}")
+        # sys.stdout.flush()
+        self.current_image = f"data: {b64_string}"
 
     def test_callback(self, msg):
         # start = time.time()
@@ -55,6 +59,11 @@ class MinimalSubscriber(Node):
         # sys.stdout.write(f"height {msg.height} width {msg.width} time {end - start} data {b64_string}")
         sys.stdout.write(f"Got Image")
         sys.stdout.flush()
+
+    def timer_callback(self):
+        sys.stdout.write(self.current_image)
+        sys.stdout.flush()
+        
 
 def main(args=None):
     try: 

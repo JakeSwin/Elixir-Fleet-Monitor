@@ -16,15 +16,23 @@ class MinimalSubscriber(Node):
 
     def __init__(self):
         super().__init__('minimal_subscriber')
+        self.image_topic = sys.argv[1]
         self.bridge = CvBridge()
         # '/robot1/camera/rgb/image_raw'
+        # self.subscription = self.create_subscription(
+        #     Image,
+        #     '/camera/image_raw',
+        #     self.listener_callback,
+        #     1
+        # )
         self.subscription = self.create_subscription(
             Image,
-            '/camera/image_raw',
+            self.image_topic,
             self.listener_callback,
             1
         )
         timer_period = 0.5
+        # timer_period = 0.25
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.current_image = "info: None"
         self.subscription

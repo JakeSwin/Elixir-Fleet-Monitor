@@ -4,7 +4,7 @@ defmodule FleetMonitor.Runtime.Server do
 
   @type t :: pid
 
-  @command "python3 ./lib/python/fleet_monitor.py"
+  @command "python3 " <> Path.expand("./lib/python/fleet_monitor.py") <> " /camera/image_raw"
   @me __MODULE__
 
   ### Client Process
@@ -32,13 +32,16 @@ defmodule FleetMonitor.Runtime.Server do
     # Logger.info "Latest output: #{image_data}"
     # Logger.info "Image Received"
     Enum.each(state.pids, fn pid ->
-      GenServer.cast(pid, { :new_image, state.image_partial })
+      send(pid, { :new_image, state.image_partial })
     end)
+    # Enum.each(state.pids, fn pid ->
+    #   send(pid, { :test , Enum.random([1,2,3,4]) })
+    # end)
     { :noreply, %{ state | latest_image: state.image_partial, image_partial: image_data }}
   end
 
-  def handle_info({ _port, { :data, "info: " <> info_data }}, state) do
-    Logger.info "Info: #{info_data}"
+  def handle_info({ _port, { :data, "info: " <> _info_data }}, state) do
+    # Logger.info "Info: #{info_data}"
     { :noreply, state }
   end
 

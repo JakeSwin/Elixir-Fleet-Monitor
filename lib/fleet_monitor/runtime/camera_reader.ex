@@ -1,29 +1,34 @@
-defmodule FleetMonitor.Runtime.Server do
+defmodule FleetMonitor.Runtime.CameraReader do
   use GenServer
   require Logger
+  import String, only: [to_atom: 1]
 
   @type t :: pid
 
-  @command "python3 " <> Path.expand("./lib/python/fleet_monitor.py") <> " /camera/image_raw"
+  @python_version "python3.8"
+  @path Path.expand("./lib/python/camera_reader.py")
   @me __MODULE__
 
   ### Client Process
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, nil, name: @me)
+  def start_link([image_topic: topic] = args) do
+    GenServer.start_link(__MODULE__, args, name: to_atom(topic))
   end
 
-  def get_image do
-    GenServer.call(@me, { :get_image })
+  def get_image(topic) do
+    GenServer.call(to_atom(topic), { :get_image })
   end
 
-  def subscribe(pid) do
-    GenServer.call(@me, { :subscribe, pid })
+  def subscribe(pid, topic) do
+    GenServer.call(to_atom(topic), { :subscribe, pid })
   end
 
   ### Server Process
-  def init(_) do
-    _port = Port.open({:spawn, @command}, [:binary, :exit_status])
+  def init(image_topic: topic) do
+    _port = Port.open(
+      {:spawn, Enum.join([@python_version, @path, topic], " ")},
+      [:binary, :exit_status]
+    )
 
     { :ok, %{ latest_image: nil, exit_status: nil, image_partial: nil, pids: [] }}
   end

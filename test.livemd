@@ -3,12 +3,29 @@
 ```elixir
 Mix.install([
   {:nx, "~> 0.5"},
+  {:yaml_elixir, "~> 2.9"},
   {:kino, "~> 0.9.0"},
   {:fleet_monitor, path: __DIR__}
 ])
 ```
 
 ## Section
+
+```elixir
+data =
+  File.read!("./config/current_map.txt")
+  |> Base.decode64!()
+  |> Kino.Image.new(:png)
+```
+
+```elixir
+%{content: content} = data
+content
+```
+
+```elixir
+File.write("./current_map.png", content)
+```
 
 ```elixir
 FleetMonitor.get_image()

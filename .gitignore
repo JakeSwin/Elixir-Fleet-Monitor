@@ -24,3 +24,6 @@ fleet_monitor-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+/config/current_map.png
+/config/current_map.txt

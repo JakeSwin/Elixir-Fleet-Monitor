@@ -15,7 +15,7 @@ signal(SIGPIPE, SIG_DFL)
 class MinimalSubscriber(Node):
 
     def __init__(self):
-        super().__init__('minimal_subscriber')
+        super().__init__('elixir_camera_reader_' + str(time.time()).split(".")[-1])
         self.image_topic = sys.argv[1]
         self.bridge = CvBridge()
         # '/robot1/camera/rgb/image_raw'

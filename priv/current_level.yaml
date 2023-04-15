@@ -1,14 +1,14 @@
 L1:
   locations:
-  - pantry
-  - supplies
-  - lounge
-  - tinyRobot1_charger
-  - coe
-  - hardware_2
-  - tinyRobot2_charger
+  - 4: pantry
+  - 13: supplies
+  - 15: lounge
+  - 16: tinyRobot1_charger
+  - 24: coe
+  - 27: hardware_2
+  - 28: tinyRobot2_charger
   map:
-    data: /home/swin/code/elixir/fleet_monitor/config/current_map.txt
+    data: /home/swin/code/elixir/fleet_monitor/_build/dev/lib/fleet_monitor/priv/current_map.txt
     encoding: png
     height: 1717
     length: 1794169

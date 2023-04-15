@@ -6,7 +6,7 @@ defmodule FleetMonitor.Runtime.CameraReader do
   @type t :: pid
 
   @python_version "python3.8"
-  @path Path.expand("./lib/python/camera_reader.py")
+  @python_path Path.join(:code.priv_dir(:fleet_monitor), "/python/camera_reader.py")
   @me __MODULE__
 
   ### Client Process
@@ -19,29 +19,22 @@ defmodule FleetMonitor.Runtime.CameraReader do
     GenServer.call(to_atom(topic), { :get_image })
   end
 
-  def subscribe(pid, topic) do
-    GenServer.call(to_atom(topic), { :subscribe, pid })
-  end
-
   ### Server Process
   def init(image_topic: topic) do
     _port = Port.open(
-      {:spawn, Enum.join([@python_version, @path, topic], " ")},
+      {:spawn, Enum.join([@python_version, @python_path, topic], " ")},
       [:binary, :exit_status]
     )
 
-    { :ok, %{ latest_image: nil, exit_status: nil, image_partial: nil, pids: [] }}
+    { :ok, %{ latest_image: nil, exit_status: nil, image_partial: nil, topic: topic }}
   end
 
   def handle_info({ _port, { :data, "data: " <> image_data }}, state) do
     # Logger.info "Latest output: #{image_data}"
     # Logger.info "Image Received"
-    Enum.each(state.pids, fn pid ->
-      send(pid, { :new_image, state.image_partial })
-    end)
-    # Enum.each(state.pids, fn pid ->
-    #   send(pid, { :test , Enum.random([1,2,3,4]) })
-    # end)
+    if state.image_partial do
+      Phoenix.PubSub.broadcast!(FleetMonitor.PubSub, state.topic, {:new_image, state.image_partial})
+    end
     { :noreply, %{ state | latest_image: state.image_partial, image_partial: image_data }}
   end
 
@@ -70,9 +63,5 @@ defmodule FleetMonitor.Runtime.CameraReader do
       data -> data
     end
     { :reply, image_base64, state}
-  end
-
-  def handle_call({ :subscribe, pid }, _from, state) do
-    { :reply, :ok, %{ state | pids: [ pid | state.pids ] }}
   end
 end

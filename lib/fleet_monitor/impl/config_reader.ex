@@ -1,5 +1,5 @@
 defmodule FleetMonitor.Impl.ConfigReader do
-  @path Path.expand("./config/current_level.yaml")
+  @path Path.join(:code.priv_dir(:fleet_monitor), "current_level.yaml")
   @external_resource @path
   @config elem(YamlElixir.read_from_file(@path), 1)
 

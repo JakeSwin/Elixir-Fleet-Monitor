@@ -2,7 +2,8 @@ defmodule FleetMonitor.Runtime.TaskSubmitter do
   use GenServer
   require Logger
 
-  @command "python3.8 " <> Path.expand("./lib/python/task_submitter.py")
+  @python_version "python3.8"
+  @python_path Path.join(:code.priv_dir(:fleet_monitor), "/python/task_submitter.py")
   @me __MODULE__
 
   ### Client Process
@@ -17,15 +18,15 @@ defmodule FleetMonitor.Runtime.TaskSubmitter do
 
   ### Server Process
   def init(_) do
-    port = Port.open({:spawn, @command}, [:binary, :exit_status])
+    port = Port.open({:spawn, Enum.join([@python_version, @python_path], " ")}, [:binary, :exit_status])
     Port.monitor(port)
 
     { :ok, %{ port: port, exit_status: nil }}
   end
 
-  def handle_info({ _port, { :data, data }}, %{port: port} = state) do
+  def handle_info({ _port, { :data, data }}, state) do
     Logger.info "Info: #{data}"
-    Port.close(port)
+    # Port.close(port)
     { :noreply, state }
   end
 

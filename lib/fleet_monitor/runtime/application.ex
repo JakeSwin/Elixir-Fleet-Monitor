@@ -11,7 +11,9 @@ defmodule FleetMonitor.Runtime.Application do
     children = [
       # Starts a worker by calling: FleetMonitor.Worker.start_link(arg)
       # { FleetMonitor.Runtime.CameraReader, [image_topic: "/camera/image_raw"] },
-      { FleetMonitor.Runtime.TaskSubmitter, [ ] }
+      { FleetMonitor.Runtime.TaskSubmitter, [ ] },
+      { FleetMonitor.Runtime.FleetReader, [ ] },
+      { Phoenix.PubSub, name: FleetMonitor.PubSub }
       | generate_camera_readers(FleetMonitor.get_image_topics())
     ]
 

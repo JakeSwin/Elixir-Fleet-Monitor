@@ -4,7 +4,6 @@ defmodule FleetMonitor do
   alias FleetMonitor.Impl.ConfigReader
 
   defdelegate get_image(topic), to: CameraReader
-  defdelegate subscribe(pid, topic), to: CameraReader
   defdelegate submit_task(start_name, finish_name), to: TaskSubmitter
   defdelegate get_conf, to: ConfigReader
   defdelegate get_locations, to: ConfigReader

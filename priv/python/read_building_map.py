@@ -7,6 +7,7 @@ import base64
 import subprocess
 from PIL import Image
 
+from os import path
 from rclpy.node import Node
 from rmf_building_map_msgs.srv import GetBuildingMap
 
@@ -37,13 +38,14 @@ def main(args=None):
 
         response = read_building_map.send_request()
 
+        folder_path = path.normpath(path.join(path.abspath(__file__), "..", ".."))
         level = response.building_map.levels[0]
 
         im = base64.b64encode(level.images[0].data)
-        with open("./config/current_map.txt", "w") as file:
+        with open(path.join(folder_path, "current_map.txt"), "w") as file:
             file.write(im.decode("utf-8"))
 
-        with open("./config/current_map.png", "wb") as file:
+        with open(path.join(folder_path, "current_map.png"), "wb") as file:
             file.write(base64.b64decode(im))
 
         verticies_list = [{"x": i.x, "y": i.y} for i in level.nav_graphs[0].vertices]
@@ -53,7 +55,11 @@ def main(args=None):
         data = {
             "name": response.building_map.name,
             level.name: {
-                "locations": [x.name for x in level.nav_graphs[0].vertices if x.name != ''],
+                "locations": [
+                    {index: vertex.name} for index, vertex in zip(
+                        range(len(level.nav_graphs[0].vertices)), level.nav_graphs[0].vertices
+                    ) if vertex.name != ''
+                ],
                 "map": {
                     "length": len(level.images[0].data),
                     "name": level.images[0].name,
@@ -62,7 +68,7 @@ def main(args=None):
                     "yaw": level.images[0].yaw,
                     "scale": level.images[0].scale,
                     "encoding": level.images[0].encoding,
-                    "data": os.path.abspath("./config/current_map.txt")
+                    "data": path.join(folder_path, "current_map.txt")
                 },
                 "nav_graph": {
                     "verticies": {
@@ -82,12 +88,12 @@ def main(args=None):
         if len(image_topics) >= 1 and not image_topics[0] == "":
             data["image_topics"] = list(filter(None, image_topics))
 
-        with Image.open("./config/current_map.png") as im:
+        with Image.open(path.join(folder_path, "current_map.png")) as im:
             width, height = im.size
             data[level.name]["map"]["width"] = width
             data[level.name]["map"]["height"] = height
 
-        with open("./config/current_level.yaml", "w") as file:
+        with open(path.join(folder_path, "current_level.yaml"), "w") as file:
             yaml.dump(data, file)
         
         sys.stdout.write("Config generated successfully")

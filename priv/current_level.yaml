@@ -8,7 +8,7 @@ L1:
   - 27: hardware_2
   - 28: tinyRobot2_charger
   map:
-    data: /home/swin/code/elixir/fleet_monitor/_build/dev/lib/fleet_monitor/priv/current_map.txt
+    data: /home/swin/code/elixir/fleet_dashboard/_build/dev/lib/fleet_monitor/priv/current_map.txt
     encoding: png
     height: 1717
     length: 1794169

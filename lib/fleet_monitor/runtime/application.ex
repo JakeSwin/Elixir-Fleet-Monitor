@@ -13,6 +13,7 @@ defmodule FleetMonitor.Runtime.Application do
       # { FleetMonitor.Runtime.CameraReader, [image_topic: "/camera/image_raw"] },
       { FleetMonitor.Runtime.TaskSubmitter, [ ] },
       { FleetMonitor.Runtime.FleetReader, [ ] },
+      { FleetMonitor.Runtime.OngoingTaskReader, [ ] },
       { Phoenix.PubSub, name: FleetMonitor.PubSub }
       | generate_camera_readers(FleetMonitor.get_image_topics())
     ]
